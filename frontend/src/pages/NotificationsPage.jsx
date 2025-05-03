@@ -118,14 +118,6 @@ const NotificationsPage = () => {
         ) : (
           <NoNotificationsFound />
         )}
-
-        {/* 
-        {acceptedRequests.length > 0 && (
-          <section>
-            ...
-          </section>
-        )} 
-        */}
       </div>
       {/* التوست هنا */}
       <ToastContainer />
