@@ -1,12 +1,8 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { acceptFriendRequest, getFriendRequests } from "../lib/api";
-import {
-  BellIcon,
-  ClockIcon,
-  MessageSquareIcon,
-  UserCheckIcon,
-} from "lucide-react";
+import { UserCheckIcon } from "lucide-react";
 import NoNotificationsFound from "../components/NoNotificationsFound";
+import { toast, ToastContainer } from "react-toastify";
 
 const NotificationsPage = () => {
   const queryClient = useQueryClient();
@@ -26,11 +22,14 @@ const NotificationsPage = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["friendRequests"] });
       queryClient.invalidateQueries({ queryKey: ["friends"] });
+      toast.success("تم قبول طلب الصداقة بنجاح!", {
+        position: toast.POSITION.TOP_CENTER,
+        autoClose: 3000,
+      });
     },
   });
 
   const incomingRequests = friendRequests?.incomingReqs || [];
-  const acceptedRequests = friendRequests?.acceptedReqs || [];
 
   if (isLoading) {
     return (
@@ -55,7 +54,7 @@ const NotificationsPage = () => {
           Notifications
         </h1>
 
-        {incomingRequests.length > 0 && (
+        {incomingRequests.length > 0 ? (
           <section className="space-y-4">
             <h2 className="text-xl font-semibold flex items-center gap-2">
               <UserCheckIcon className="h-5 w-5 text-primary" />
@@ -116,66 +115,20 @@ const NotificationsPage = () => {
               ))}
             </div>
           </section>
-        )}
-
-        {acceptedRequests.length > 0 && (
-          <section className="space-y-4">
-            <h2 className="text-xl font-semibold flex items-center gap-2">
-              <BellIcon className="h-5 w-5 text-success" />
-              New Connections
-            </h2>
-
-            <div className="space-y-3">
-              {acceptedRequests.map((notification) => (
-                <div
-                  key={notification._id}
-                  className="card bg-base-200 shadow-sm"
-                >
-                  <div className="card-body p-4">
-                    <div className="flex items-start gap-3">
-                      <div className="avatar mt-1 size-10 rounded-full">
-                        <img
-                          src={
-                            notification.recipient?.profilePic ||
-                            "/default-avatar.jpg"
-                          }
-                          alt={notification.recipient?.fullName || "User"}
-                          onError={(e) => {
-                            e.currentTarget.onerror = null;
-                            e.currentTarget.src = "/default-avatar.jpg";
-                          }}
-                          className="w-full h-full object-cover rounded-full"
-                        />
-                      </div>
-                      <div className="flex-1">
-                        <h3 className="font-semibold">
-                          {notification.recipient?.fullName}
-                        </h3>
-                        <p className="text-sm my-1">
-                          {notification.recipient?.fullName} accepted your
-                          friend request
-                        </p>
-                        <p className="text-xs flex items-center opacity-70">
-                          <ClockIcon className="h-3 w-3 mr-1" />
-                          Recently
-                        </p>
-                      </div>
-                      <div className="badge badge-success">
-                        <MessageSquareIcon className="h-3 w-3 mr-1" />
-                        New Friend
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </section>
-        )}
-
-        {incomingRequests.length === 0 && acceptedRequests.length === 0 && (
+        ) : (
           <NoNotificationsFound />
         )}
+
+        {/* 
+        {acceptedRequests.length > 0 && (
+          <section>
+            ...
+          </section>
+        )} 
+        */}
       </div>
+      {/* التوست هنا */}
+      <ToastContainer />
     </div>
   );
 };
