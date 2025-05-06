@@ -2,10 +2,12 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { acceptFriendRequest, getFriendRequests } from "../lib/api";
 import { UserCheckIcon } from "lucide-react";
 import NoNotificationsFound from "../components/NoNotificationsFound";
-import { toast, ToastContainer } from "react-toastify";
+import { ToastContainer } from "react-toastify";
+import { useToast } from "../context/ToastContext";
 
 const NotificationsPage = () => {
   const queryClient = useQueryClient();
+  const { showToast } = useToast();
 
   const {
     data: friendRequests,
@@ -19,13 +21,28 @@ const NotificationsPage = () => {
 
   const { mutate: acceptRequestMutation, isPending } = useMutation({
     mutationFn: acceptFriendRequest,
-    onSuccess: () => {
+    onSuccess: (_, requestId) => {
       queryClient.invalidateQueries({ queryKey: ["friendRequests"] });
       queryClient.invalidateQueries({ queryKey: ["friends"] });
-      toast.success("تم قبول طلب الصداقة بنجاح!", {
-        position: toast.POSITION.TOP_CENTER,
-        autoClose: 3000,
-      });
+
+      // Find the request details for personalized message
+      const acceptedRequest = friendRequests?.incomingReqs?.find(
+        (req) => req._id === requestId
+      );
+
+      showToast(
+        `Friend request accepted from${
+          acceptedRequest?.sender?.fullName || "Your friend"
+        } Successfully!`,
+        "success"
+      );
+    },
+    onError: (error) => {
+      showToast(
+        error.response?.data?.message ||
+          "Failed to accept friend request. Please try again later.",
+        "error"
+      );
     },
   });
 
